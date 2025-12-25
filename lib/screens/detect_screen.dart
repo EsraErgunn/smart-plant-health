@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/tflite_service.dart';
 import '../services/image_service.dart';
 import '../services/permission_service.dart';
 import 'prescription_screen.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../widgets/diagnosis_gallery_modal.dart';
+import '../providers/diagnosis_controller.dart';
 
 class DetectScreen extends StatefulWidget {
   const DetectScreen({super.key});
@@ -74,6 +77,10 @@ class _DetectScreenState extends State<DetectScreen> {
         _loading = false;
       });
 
+      // Auto-save to gallery history
+      // We use listen: false because we are in a method, not rebuilding UI based on this
+      Provider.of<DiagnosisController>(context, listen: false).saveImage(file.path);
+
       // Navigate to result
       Navigator.push(
         context,
@@ -97,6 +104,18 @@ class _DetectScreenState extends State<DetectScreen> {
       appBar: AppBar(
         title: Text(l10n.diagnosis),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) => const DiagnosisGalleryModal(),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(

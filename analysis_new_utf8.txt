@@ -1,0 +1,10 @@
+﻿Analyzing my_flutter_app_clean...                               
+
+  error - The named parameter 'diseaseName' is required, but there's no corresponding argument - lib\screens\home_screen.dart:23:11 - missing_required_argument
+   info - Parameter 'key' could be a super parameter - lib\screens\prescription_screen.dart:10:9 - use_super_parameters
+   info - An uninitialized variable should have an explicit type annotation - lib\services\diagnosis_database_service.dart:49:11 - prefer_typing_uninitialized_variables
+   info - Don't invoke 'print' in production code - lib\services\gemini_service.dart:11:7 - avoid_print
+   info - The private field _apiKey could be 'final' - lib\services\map_service.dart:11:18 - prefer_final_fields
+   info - Don't invoke 'print' in production code - lib\services\prescription_service.dart:19:7 - avoid_print
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/foundation.dart' - lib\services\tflite_service.dart:1:8 - unnecessary_import
+

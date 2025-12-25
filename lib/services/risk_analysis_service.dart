@@ -1,161 +1,132 @@
 import '../models/weather_model.dart';
-import '../models/risk_explanation.dart';
 import '../models/plant_type.dart';
-import 'plant_risk_service.dart';
 
 class RiskAlert {
   final String title;
   final String message;
-  final String severity; // High, Medium, Low
+  final String severity; // Low, Medium, High
 
-  RiskAlert({
-    required this.title,
-    required this.message,
-    required this.severity,
-  });
+  RiskAlert({required this.title, required this.message, required this.severity});
+}
+
+class RiskExplanation {
+  final String summary;
+  final List<String> factors;
+  
+  RiskExplanation({required this.summary, required this.factors});
 }
 
 class RiskAnalysisService {
-  // ===============================
-  // 🔢 SCORE CALCULATION HELPERS
-  // ===============================
+  
+  /// General Risk Analysis
+  List<RiskAlert> analyzeRisk(WeatherData current, List<ForecastData> forecast) {
+    List<RiskAlert> alerts = [];
 
-  int humidityScore(int humidity) {
-    if (humidity >= 85) return 40;
-    if (humidity >= 75) return 30;
-    if (humidity >= 65) return 20;
-    if (humidity >= 55) return 10;
-    return 0;
-  }
+    // Fungal Risk
+    if (current.humidity > 70 && current.temp > 20 && current.temp < 30) {
+      alerts.add(RiskAlert(
+        title: "High Fungal Disease Risk",
+        message: "High humidity and moderate temps favor fungal growth.",
+        severity: "High",
+      ));
+    }
 
-  int rainScore(bool rainExpected) {
-    return rainExpected ? 30 : 0;
-  }
-
-  int temperatureScore(double temp) {
-    if (temp >= 18 && temp <= 28) return 30; // fungal ideal
-    if (temp >= 15 && temp <= 32) return 15;
-    return 0;
-  }
-
-  // ===============================
-  // 🌡️ BASE RISK SCORE (0–100)
-  // ===============================
-  int calculateRiskScore(
-    WeatherData current,
-    List<ForecastData> forecast,
-  ) {
-    final bool rainExpected = forecast.any(
-      (f) => f.description.toLowerCase().contains("rain"),
-    );
-
-    final int score =
-        humidityScore(current.humidity.toInt()) +
-        temperatureScore(current.temp) +
-        rainScore(rainExpected);
-
-    return score.clamp(0, 100);
-  }
-
-  // ===============================
-  // 🌱 PLANT-AWARE RISK SCORE (FIXED)
-  // ===============================
-  int calculatePlantAwareRiskScore(
-    WeatherData current,
-    List<ForecastData> forecast,
-    PlantType plant,
-  ) {
-    final profile = PlantRiskService.getProfile(plant);
-
-    final bool rainExpected = forecast.any(
-      (f) => f.description.toLowerCase().contains("rain"),
-    );
-
-    final double weightedScore =
-        (humidityScore(current.humidity.toInt()) *
-            profile.humiditySensitivity) +
-        (temperatureScore(current.temp) *
-            profile.temperatureSensitivity) +
-        (rainScore(rainExpected) *
-            profile.rainSensitivity);
-
-    return weightedScore.round().clamp(0, 100);
-  }
-
-  // ===============================
-  // 🚦 SCORE → LEVEL
-  // ===============================
-  String riskLevel(int score) {
-    if (score >= 70) return "High";
-    if (score >= 40) return "Medium";
-    return "Low";
-  }
-
-  // ===============================
-  // 🌱 PLANT-AWARE MAIN RISK ALERT
-  // ===============================
-  List<RiskAlert> analyzePlantAwareRisk(
-    WeatherData current,
-    List<ForecastData> forecast,
-    PlantType plant,
-  ) {
-    final List<RiskAlert> alerts = [];
-
-    final int score =
-        calculatePlantAwareRiskScore(current, forecast, plant);
-    final String level = riskLevel(score);
-
-    alerts.add(
-      RiskAlert(
-        title:
-            "$level ${plant.name.toUpperCase()} Disease Risk ($score/100)",
-        message:
-            "Risk is calculated based on weather conditions and crop sensitivity.",
-        severity: level,
-      ),
-    );
+    // Pest Risk
+    if (current.temp > 30) {
+      alerts.add(RiskAlert(
+        title: "Pest Activity Warning",
+        message: "High temperatures may increase pest reproduction.",
+        severity: "Medium",
+      ));
+    }
+    
+    // Rain
+    bool rainExpected = forecast.any((f) => f.description.toLowerCase().contains("rain"));
+    if (rainExpected) {
+      alerts.add(RiskAlert(
+        title: "Rain Forecast",
+        message: "Avoid spraying chemicals. Rain expected within 5 days.",
+        severity: "Medium",
+      ));
+    }
 
     return alerts;
   }
 
-  // ===============================
-  // 🧠 WHY THIS RISK? (PLANT-AWARE)
-  // ===============================
-  RiskExplanation buildExplanation(
-    WeatherData current,
-    List<ForecastData> forecast,
-    PlantType plant,
-  ) {
-    final List<String> factors = [];
+  /// Plant-Specific Risk Analysis
+  List<RiskAlert> analyzePlantAwareRisk(WeatherData current, List<ForecastData> forecast, PlantType plant) {
+    List<RiskAlert> alerts = [];
 
-    factors.add("Selected crop: ${plant.name.toUpperCase()}");
-
-    if (current.humidity >= 70) {
-      factors.add(
-        "High humidity (${current.humidity.toInt()}%) significantly affects this crop.",
-      );
+    // 1. Temperature Check
+    if (current.temp < plant.minTemp) {
+      alerts.add(RiskAlert(
+        title: "Cold Stress (${plant.name})",
+        message: "Temperature is below ideal range for ${plant.name}.",
+        severity: "High",
+      ));
+    } else if (current.temp > plant.maxTemp) {
+      alerts.add(RiskAlert(
+        title: "Heat Stress (${plant.name})",
+        message: "Temperature exceeds ideal range for ${plant.name}.",
+        severity: "Medium",
+      ));
     }
 
-    final bool rainExpected = forecast.any(
-      (f) => f.description.toLowerCase().contains("rain"),
-    );
-
-    if (rainExpected) {
-      factors.add(
-        "Rain increases disease spread risk for this plant.",
-      );
+    // 2. Humidity Check (Simplified: most crops dislike very high humidity due to fungus)
+    if (current.humidity > 80) {
+       alerts.add(RiskAlert(
+        title: "Fungal Risk (${plant.name})",
+        message: "Excessive humidity poses a threat to ${plant.name}.",
+        severity: "High",
+      ));
     }
 
-    if (current.temp >= 18 && current.temp <= 28) {
-      factors.add(
-        "Temperature (${current.temp.toStringAsFixed(1)}°C) is suitable for fungal growth.",
-      );
+    return alerts;
+  }
+
+  /// Build 'Why this risk?' explanation
+  RiskExplanation buildExplanation(WeatherData current, List<ForecastData> forecast, PlantType plant) {
+    List<String> factors = [];
+    
+    factors.add("Current Temperature: ${current.temp}°C (Ideal: ${plant.minTemp}-${plant.maxTemp}°C)");
+    factors.add("Humidity: ${current.humidity}%");
+    
+    // Check constraints
+    if (current.temp < plant.minTemp || current.temp > plant.maxTemp) {
+      factors.add("❌ Temperature is out of optimal range.");
+    } else {
+      factors.add("✅ Temperature is optimal.");
+    }
+    
+    if (current.humidity > 70) {
+       factors.add("⚠️ High humidity increases disease probability.");
     }
 
     return RiskExplanation(
-      summary:
-          "Risk is calculated based on weather conditions and the selected crop's sensitivity.",
-      factors: factors,
+      summary: "Risk based on ${plant.name} requirements.",
+      factors: factors
     );
+  }
+
+  /// Calculates a simple 0-100 risk score for each day in the forecast
+  /// This is used for the Visualization Chart
+  List<double> calculateDailyRisks(List<ForecastData> forecasts) {
+    return forecasts.map((day) {
+      double score = 0.0;
+      
+      // 1. Humidity Contribution (0-50 points)
+      // High humidity is generally risky for diseases
+      if (day.humidity > 80) score += 50;
+      else if (day.humidity > 60) score += 30;
+      else if (day.humidity > 40) score += 10;
+      
+      // 2. Temperature Contribution (0-50 points)
+      // Identify "Training Zone" for pathogens (often 20-30C)
+      if (day.temp >= 20 && day.temp <= 30) score += 50;
+      else if (day.temp > 30) score += 30; // Heat stress
+      else if (day.temp < 15) score += 20; // Cold stress
+      
+      return score;
+    }).toList();
   }
 }

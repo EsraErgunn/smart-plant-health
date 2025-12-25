@@ -1,46 +1,69 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/place_model.dart';
-import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MapService {
-  // Mock data generator for nearby places
-  Future<List<Place>> getNearbyPlaces(double lat, double lng) async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate API call
+  static final String? _apiKey = dotenv.env['GOOGLE_MAPS_API_KEY']; 
+  
+  // Use a generic global query for text search
+  static const String _defaultQuery = 'agricultural dealers, zirai ilaç bayileri';
+
+  Future<List<PlaceModel>> searchDealers(
+    double lat,
+    double lng, {
+    String? query,
+  }) async {
+    if (_apiKey == null) {
+      debugPrint("GOOGLE_MAPS_API_KEY is missing");
+      return [];
+    }
     
-    final Random random = Random();
-    List<Place> places = [];
+    // Combining generic terms if no specific query is passed
+    final String effectiveQuery = query ?? _defaultQuery;
 
-    // Generate 3 experts
-    for (int i = 0; i < 3; i++) {
-        double offsetLat = (random.nextDouble() - 0.5) * 0.02; // Roughly 2km
-        double offsetLng = (random.nextDouble() - 0.5) * 0.02;
-        
-        places.add(Place(
-            id: 'expert_$i',
-            name: 'Expert Agronomist ${String.fromCharCode(65+i)}',
-            type: 'expert',
-            lat: lat + offsetLat,
-            lng: lng + offsetLng,
-            address: 'Agricultural Zone ${i+1}',
-            phone: '+1 555 010 $i'
-        ));
+    // Google Maps Text Search API
+    // We pass location to bias results, but NO radius to allow "Turkey-wide" or broader results if local ones aren't found.
+    final url =
+        'https://maps.googleapis.com/maps/api/place/textsearch/json'
+        '?query=${Uri.encodeComponent(effectiveQuery)}'
+        '&location=$lat,$lng'
+        '&key=$_apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['status'] == 'OK') {
+           List<PlaceModel> places = [];
+           for (var item in data['results']) {
+             places.add(
+               PlaceModel(
+                 name: item['name'],
+                 lat: item['geometry']['location']['lat'],
+                 lng: item['geometry']['location']['lng'],
+                 rating: (item['rating'] ?? 0).toDouble(),
+                 isOpen: item['opening_hours']?['open_now'] ?? false,
+               ),
+             );
+           }
+           return places;
+        } else {
+           debugPrint('Places API status: ${data['status']}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching text search: $e');
     }
+    
+    return [];
+  }
 
-    // Generate 2 stores
-    for (int i = 0; i < 2; i++) {
-        double offsetLat = (random.nextDouble() - 0.5) * 0.02;
-        double offsetLng = (random.nextDouble() - 0.5) * 0.02;
-        
-        places.add(Place(
-            id: 'store_$i',
-            name: 'Farm Supply Store ${i+1}',
-            type: 'store',
-            lat: lat + offsetLat,
-            lng: lng + offsetLng,
-            address: 'Market Street ${i+10}',
-            phone: '+1 555 020 $i'
-        ));
-    }
-
-    return places;
+  // Kept for backward compatibility if needed, but redirects to search
+  Future<List<PlaceModel>> getNearbyAgroDealers(double lat, double lng) async {
+    return searchDealers(lat, lng);
   }
 }

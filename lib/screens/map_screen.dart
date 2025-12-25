@@ -1,187 +1,250 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-
-import '../services/map_service.dart';
-import '../services/geocoding_service.dart';
-import '../services/permission_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/map_controller.dart';
+import '../models/place_model.dart';
+import '../widgets/city_search_sheet.dart'; 
+import '../data/turkey_cities.dart'; 
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final String diseaseName;
+  
+  const MapScreen({
+    super.key, 
+    required this.diseaseName,
+  });
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final MapService _mapService = MapService();
-
-  late GoogleMapController _mapController;
-
-  // Default position (Ankara)
-  static const LatLng _initialPos = LatLng(39.9334, 32.8597);
-
-  LatLng? _currentPos;
-
-  // 🔹 Seçilen konum
-  double? _selectedLat;
-  double? _selectedLon;
-  String _locationLabel = "Konum seçilmedi";
-
-  // Marker’lar
-  Set<Marker> _markers = {};
-
-  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _initMap();
-  }
-
-  Future<void> _initMap() async {
-    final hasPermission = await PermissionService.requestLocation();
-    if (!hasPermission) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Location permission required")),
-        );
-      }
-      setState(() => _loading = false);
-      return;
-    }
-
-    try {
-      final pos = await Geolocator.getCurrentPosition();
-      _currentPos = LatLng(pos.latitude, pos.longitude);
-
-      await _loadNearbyPlaces();
-    } catch (e) {
-      debugPrint("Location error: $e");
-    }
-
-    setState(() => _loading = false);
-  }
-
-  Future<void> _loadNearbyPlaces() async {
-    if (_currentPos == null) return;
-
-    final places = await _mapService.getNearbyPlaces(
-      _currentPos!.latitude,
-      _currentPos!.longitude,
-    );
-
-    _markers = places.map((place) {
-      return Marker(
-        markerId: MarkerId(place.id),
-        position: LatLng(place.lat, place.lng),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          place.type == 'expert'
-              ? BitmapDescriptor.hueGreen
-              : BitmapDescriptor.hueBlue,
-        ),
-        infoWindow: InfoWindow(
-          title: place.name,
-          snippet: place.phone,
-        ),
-      );
-    }).toSet();
-  }
-
-  /// 📍 Seçilen konuma haritayı götür
-  void _moveMap(double lat, double lon) {
-    _mapController.animateCamera(
-      CameraUpdate.newLatLng(
-        LatLng(lat, lon),
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MapController>(context, listen: false)
+          .loadCurrentLocationAndDealers(widget.diseaseName);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading && _currentPos == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Nearby Experts & Stores"),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GoogleMap(
-              initialCameraPosition: const CameraPosition(
-                target: _initialPos,
-                zoom: 10,
-              ),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-
-              markers: {
-                ..._markers,
-
-                // 🔴 Seçilen konum marker’ı
-                if (_selectedLat != null && _selectedLon != null)
-                  Marker(
-                    markerId: const MarkerId("selected_location"),
-                    position: LatLng(_selectedLat!, _selectedLon!),
-                    icon: BitmapDescriptor.defaultMarkerWithHue(
-                      BitmapDescriptor.hueRed,
-                    ),
-                  ),
-              },
-
-              onMapCreated: (controller) {
-                _mapController = controller;
-                if (_currentPos != null) {
-                  controller.moveCamera(
-                    CameraUpdate.newLatLngZoom(_currentPos!, 14),
-                  );
-                }
-              },
-
-              /// 🗺️ Haritaya tıklanınca
-              onTap: (LatLng point) async {
-                final address =
-                    await GeocodingService.getAddressFromLatLng(
-                  point.latitude,
-                  point.longitude,
-                );
-
-                setState(() {
-                  _selectedLat = point.latitude;
-                  _selectedLon = point.longitude;
-                  _locationLabel = address;
-                });
-
-                _moveMap(point.latitude, point.longitude);
-              },
-            ),
-          ),
-
-          /// 🏷️ Gerçek yer adı
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              border: const Border(
-                top: BorderSide(color: Colors.grey),
-              ),
-            ),
-            child: Text(
-              _locationLabel,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+        title: const Text("Nearby Dealers"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: "Search City",
+            onPressed: () async {
+              final result = await showModalBottomSheet(
+                context: context, 
+                isScrollControlled: true, // Allow full height
+                builder: (context) => const CitySearchSheet()
+              );
+              
+              if (result != null && result is City) {
+                 // Trigger global sync & animation
+                 if (mounted) {
+                   Provider.of<MapController>(context, listen: false)
+                       .updateManualLocation(result.lat, result.lng);
+                   
+                   ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(content: Text("Flying to ${result.name}..."))
+                   );
+                 }
+              }
+            },
+          )
         ],
+      ),
+      body: Consumer<MapController>(
+        builder: (context, controller, child) {
+          if (controller.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                   const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                   const SizedBox(height: 16),
+                   Text("Error loading map", style: Theme.of(context).textTheme.titleLarge),
+                   Padding(
+                     padding: const EdgeInsets.all(16.0),
+                     child: Text(controller.errorMessage!, textAlign: TextAlign.center),
+                   ),
+                   ElevatedButton(
+                     onPressed: () => controller.loadCurrentLocationAndDealers(widget.diseaseName), 
+                     child: const Text("Retry"),
+                   )
+                ],
+              ),
+            );
+          }
+
+          return Stack(
+            children: [
+              controller.currentPosition == null
+                ? const Center(child: CircularProgressIndicator())
+                : GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: controller.currentPosition!,
+                      zoom: 12, 
+                    ),
+                    onMapCreated: controller.onMapCreated,
+                    onCameraMove: controller.onCameraMove,
+                    onCameraIdle: controller.onCameraIdle,
+                    markers: controller.markers,
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    padding: const EdgeInsets.only(bottom: 300, top: 40),
+                    onTap: (_) => controller.clearSelection(),
+                    zoomControlsEnabled: false, 
+                  ),
+              
+              if (controller.isLoading)
+                 Align(
+                   alignment: Alignment.topCenter,
+                   child: Container(
+                     margin: const EdgeInsets.only(top: 80),
+                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                     decoration: BoxDecoration(
+                       color: Colors.white,
+                       borderRadius: BorderRadius.circular(20),
+                       boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black26)]
+                     ),
+                     child: const Row(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                         SizedBox(width: 8),
+                         Text("Searching area...", style: TextStyle(fontWeight: FontWeight.bold)),
+                       ],
+                     ),
+                   ),
+                 ),
+
+              // Bottom Panel
+              if (!controller.isLoading && controller.currentPosition != null)
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                  child: _buildBottomCard(context, controller),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBottomCard(BuildContext context, MapController controller) {
+    final PlaceModel? selected = controller.selectedPlace;
+
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (selected != null) ...[
+                // Selected Dealer View
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        selected.name,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () => controller.clearSelection(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                      selected.rating.toString(), 
+                      style: const TextStyle(fontWeight: FontWeight.bold)
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: selected.isOpen ? Colors.green.shade100 : Colors.red.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        selected.isOpen ? "OPEN" : "CLOSED",
+                        style: TextStyle(
+                          fontSize: 12, 
+                          color: selected.isOpen ? Colors.green.shade800 : Colors.red.shade800,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.directions, color: Colors.white),
+                  label: const Text("Get Directions", style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () => controller.launchDirections(selected.lat, selected.lng),
+                ),
+              ] else ...[
+                // Default View
+                Row(
+                  children: [
+                     const Icon(Icons.medical_services, color: Colors.green),
+                     const SizedBox(width: 8),
+                     Expanded(
+                       child: Text(
+                         'Searching: ${controller.targetDisease.isEmpty ? "All" : controller.targetDisease}',
+                         style: const TextStyle(fontWeight: FontWeight.bold),
+                       ),
+                     ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Recommended: ${controller.recommendedMedicine}',
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Move map or click Search for other cities.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

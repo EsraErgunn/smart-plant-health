@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/disease_model.dart';
 import '../services/prescription_service.dart';
 import '../services/gemini_service.dart';
+import 'map_screen.dart';
 
 class PrescriptionScreen extends StatefulWidget {
   final String diseaseKey;
@@ -88,7 +89,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _getRiskColor(_diseaseInfo!.risk).withOpacity(0.2),
+                color: _getRiskColor(_diseaseInfo!.risk).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _getRiskColor(_diseaseInfo!.risk)),
               ),
@@ -106,6 +107,29 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
             _buildSection("Causes", _diseaseInfo!.causes),
             _buildSection("Treatment", _diseaseInfo!.treatment),
             _buildSection("Prevention", _diseaseInfo!.prevention),
+
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.map, color: Colors.white),
+                label: const Text("Find Nearby Dealers", style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MapScreen(diseaseName: widget.diseaseKey),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
 
             const Divider(height: 40),
             

@@ -1,19 +1,15 @@
-class Place {
-  final String id;
+class PlaceModel {
   final String name;
-  final String type; // 'expert' or 'store'
   final double lat;
   final double lng;
-  final String address;
-  final String phone;
+  final double rating;
+  final bool isOpen;
 
-  Place({
-    required this.id,
+  PlaceModel({
     required this.name,
-    required this.type,
     required this.lat,
     required this.lng,
-    required this.address,
-    required this.phone,
+    required this.rating,
+    required this.isOpen,
   });
 }

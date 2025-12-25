@@ -10,8 +10,21 @@ import 'screens/home_screen.dart';
 import 'config/app_theme.dart';
 import 'services/notification_service.dart';
 
+import 'package:hive_flutter/hive_flutter.dart';
+import 'services/diagnosis_database_service.dart';
+import 'services/image_picker_service.dart';
+import 'providers/diagnosis_controller.dart';
+import 'providers/map_controller.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Hive
+  await Hive.initFlutter();
+  
+  // Initialize Database Service
+  final diagnosisDb = DiagnosisDatabaseService();
+  await diagnosisDb.init();
   
   // Load environment variables
   await dotenv.load(fileName: "assets/.env");
@@ -25,6 +38,13 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(
+          create: (_) => DiagnosisController(
+            dbService: DiagnosisDatabaseService(), 
+            pickerService: ImagePickerService(),
+          )..loadImages(),
+        ),
+        ChangeNotifierProvider(create: (_) => MapController()),
       ],
       child: const MyApp(),
     ),
