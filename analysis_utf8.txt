@@ -5,12 +5,13 @@
    info - Parameter 'key' could be a super parameter - lib\screens\prescription_screen.dart:10:9 - use_super_parameters
    info - Don't invoke 'print' in production code - lib\services\gemini_service.dart:11:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\prescription_service.dart:19:7 - avoid_print
-   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:119:30 - curly_braces_in_flow_control_structures
-   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:120:35 - curly_braces_in_flow_control_structures
-   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:121:35 - curly_braces_in_flow_control_structures
-   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:125:45 - curly_braces_in_flow_control_structures
-   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:126:31 - curly_braces_in_flow_control_structures
-   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:127:31 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:242:30 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:243:35 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:244:35 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:250:45 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:251:31 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:253:27 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\services\risk_analysis_service.dart:254:14 - curly_braces_in_flow_control_structures
    info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/foundation.dart' - lib\services\tflite_service.dart:1:8 - unnecessary_import
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\risk_chart_widget.dart:110:30 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\risk_chart_widget.dart:111:31 - deprecated_member_use

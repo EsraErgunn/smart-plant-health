@@ -27,7 +27,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
   bool _loading = true;
   String? _errorMessage;
   
+  // States for Presentation / Logic
   PlantType _selectedPlant = PlantType.corn;
+  bool _isGreenhouse = false; // Sera modu
 
   @override
   void initState() {
@@ -73,22 +75,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
       }
     }
   }
-  
-  // NEW: Syncs both Weather and Map
+
   Future<void> _onCitySelected(City city) async {
     try {
-        debugPrint("City ${city.name} selected: ${city.lat}, ${city.lng}");
-        
-        // 1. Update Weather
         await _loadWeather(lat: city.lat, lng: city.lng);
         
-        // 2. Update Map Controller (Global State)
         if (mounted) {
            Provider.of<MapController>(context, listen: false)
                .updateManualLocation(city.lat, city.lng);
                
            ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text("Location updated to ${city.name}"))
+             SnackBar(content: Text("Konum güncellendi: ${city.name}"))
            );
         }
     } catch (e) {
@@ -133,30 +130,25 @@ class _WeatherScreenState extends State<WeatherScreen> {
       );
     }
 
-    if (_errorMessage != null) {
-      // Allow retry or showing search even on error
+    if (_currentWeather == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Error")),
+        appBar: AppBar(title: const Text("Hata")),
         body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Error: $_errorMessage"),
+                Text("Hata oluştu: $_errorMessage"),
                 const SizedBox(height: 16),
-                ElevatedButton(onPressed: () => _loadWeather(), child: const Text("Retry"))
+                ElevatedButton(onPressed: () => _loadWeather(), child: const Text("Tekrar Dene"))
               ],
             )
         ),
       );
     }
     
-    final alerts = _currentWeather != null 
-        ? _riskService.analyzePlantAwareRisk(_currentWeather!, _forecast, _selectedPlant) 
-        : <RiskAlert>[];
-        
-    final explanation = _currentWeather != null
-        ? _riskService.buildExplanation(_currentWeather!, _forecast, _selectedPlant)
-        : null;
+    // ANALYZE RISK based on currently displayed data AND Greenhouse context
+    final alerts = _riskService.analyzePlantAwareRisk(_currentWeather!, _forecast, _selectedPlant, isGreenhouse: _isGreenhouse);
+    final explanation = _riskService.buildExplanation(_currentWeather!, _forecast, _selectedPlant, isGreenhouse: _isGreenhouse);
 
     final rainExpected = _forecast.any((f) => f.description.toLowerCase().contains("rain"));
 
@@ -170,7 +162,35 @@ class _WeatherScreenState extends State<WeatherScreen> {
             children: [
               _buildHeader(context),
               const SizedBox(height: 20),
-              if (_currentWeather != null) _buildWeatherCard(_currentWeather!),
+              
+              // GREENHOUSE TOGGLE
+              Container(
+                decoration: BoxDecoration(
+                  color: _isGreenhouse ? Colors.green.shade50 : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _isGreenhouse ? Colors.green : Colors.grey.shade300),
+                ),
+                child: SwitchListTile(
+                  title: Text(
+                    "Sera / Kapalı Alan Üretimi",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _isGreenhouse ? Colors.green.shade900 : Colors.grey.shade700
+                    ),
+                  ),
+                  subtitle: const Text("Sera içi risk analizi için açın", style: TextStyle(fontSize: 12)),
+                  value: _isGreenhouse,
+                  // activeTrackColor removed to use theme default
+                  onChanged: (val) {
+                    setState(() {
+                      _isGreenhouse = val;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              _buildWeatherCard(_currentWeather!),
               const SizedBox(height: 20),
               _buildCropSelector(),
               const SizedBox(height: 24),
@@ -178,39 +198,36 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 children: [
                    Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 28),
                    SizedBox(width: 8),
-                   Text("Risk Alerts",
+                   Text("Risk Uyarıları",
                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2E3E2E)),
                    ),
                 ],
               ),
               const SizedBox(height: 12),
               ...alerts.map((alert) => _buildRiskCard(alert)),
-              if (alerts.isEmpty && !rainExpected)
+               if (alerts.isEmpty && !rainExpected)
                 const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text("No high risks detected.", style: TextStyle(color: Colors.green)),
+                  child: Text("Yüksek risk tespit edilmedi.", style: TextStyle(color: Colors.green)),
                 ),
 
               if (rainExpected) _buildRainWarningCard(),
               const SizedBox(height: 20),
               
-               if (explanation != null) ...[
-                 _buildExplanationTile(explanation),
-                 const SizedBox(height: 20),
-              ],
+                  _buildExplanationTile(explanation),
+                  const SizedBox(height: 20),
               
-              // Ensure chart shows if data exists
               if (_forecast.isNotEmpty) ...[
-                _buildRiskChartSection(),
+                _buildRiskChartSection(_forecast),
                 const SizedBox(height: 24),
               ],
               
-              const Text("5-Day Forecast",
+              const Text("5 Günlük Tahmin",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2E3E2E)),
               ),
               const SizedBox(height: 12),
-              _buildForecastList(),
-              const SizedBox(height: 20),
+              _buildForecastList(_forecast),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -223,7 +240,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text(
-          "Weather Analysis",
+          "Hava Durumu Analizi",
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
@@ -237,7 +254,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
           onPressed: () async {
-            // Using full height sheet
             final result = await showModalBottomSheet(
               context: context, 
               isScrollControlled: true,
@@ -249,7 +265,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             } 
           },
           icon: const Icon(Icons.location_on, size: 16, color: Colors.white),
-          label: const Text("Select City", style: TextStyle(color: Colors.white)),
+          label: const Text("Şehir Seç", style: TextStyle(color: Colors.white)),
         )
       ],
     );
@@ -294,7 +310,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
               ),
               Text(
-                weather.description,
+                "Nem: %${weather.humidity}",
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
@@ -362,7 +378,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             color: Colors.white, 
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: const Text(
-              "Select Crop",
+              "Ürün Seçin",
               style: TextStyle(
                 fontSize: 12,
                 color: Color(0xFF43A047),
@@ -438,7 +454,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Rain Forecast",
+                  "Yağmur Tahmini",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -447,7 +463,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "Rain is expected soon. Avoid spraying chemicals before rainfall.",
+                  "Yakında yağmur bekleniyor. Zirai ilaçlamayı ertelemeniz önerilir.",
                   style: TextStyle(
                     fontSize: 13,
                     color: Color(0xFF5D4037),
@@ -461,16 +477,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
   
-  Widget _buildExplanationTile(dynamic explanation) {
+  Widget _buildExplanationTile(RiskExplanation explanation) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ExpansionTile(
-        title: const Text(
-          "Why this risk?",
-          style: TextStyle(
+        initiallyExpanded: true,
+        title: Text(
+          explanation.summary,
+          style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
             color: Color(0xFF333333),
@@ -482,18 +499,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(explanation.summary, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ...(explanation.factors as List<String>).map((f) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                ...explanation.factors.map((f) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("• ", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(child: Text(f)),
+                      Expanded(child: _parseFormattedText(f)),
                     ],
                   ),
                 )),
+                
+                if (explanation.suggestedAction.isNotEmpty) ...[
+                   const SizedBox(height: 12),
+                   _parseFormattedText(
+                     "Önerilen Eylem:",
+                     baseStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)
+                   ),
+                   const SizedBox(height: 4),
+                   Container(
+                     padding: const EdgeInsets.all(8),
+                     decoration: BoxDecoration(
+                       color: Colors.green.shade50,
+                       borderRadius: BorderRadius.circular(8),
+                       border: Border.all(color: Colors.green.shade200),
+                     ),
+                     child: _parseFormattedText(
+                       explanation.suggestedAction,
+                       baseStyle: TextStyle(color: Colors.green.shade900)
+                     ),
+                   )
+                ]
               ],
             ),
           )
@@ -501,15 +537,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
       ),
     );
   }
+  
+  /// Helper to parse "**bold**" markdown into RichText
+  Widget _parseFormattedText(String text, {TextStyle? baseStyle}) {
+    final parts = text.split('**');
+    List<TextSpan> spans = [];
 
-  Widget _buildForecastList() {
+    // Default styles
+    TextStyle normalStyle = baseStyle ?? const TextStyle(color: Colors.black87);
+    TextStyle boldStyle = normalStyle.copyWith(fontWeight: FontWeight.bold);
+
+    for (int i = 0; i < parts.length; i++) {
+      if (i % 2 == 0) {
+        // Even index -> Normal text
+        spans.add(TextSpan(text: parts[i], style: normalStyle));
+      } else {
+        // Odd index -> Bold text (inside **)
+        spans.add(TextSpan(text: parts[i], style: boldStyle));
+      }
+    }
+
+    return RichText(text: TextSpan(children: spans));
+  }
+
+  Widget _buildForecastList(List<ForecastData> forecastList) {
     return SizedBox(
       height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _forecast.length,
+        itemCount: forecastList.length,
         itemBuilder: (context, index) {
-          final f = _forecast[index];
+          final f = forecastList[index];
           return Container(
             width: 100,
             margin: const EdgeInsets.only(right: 12),
@@ -549,14 +607,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildRiskChartSection() {
-    if (_forecast.isEmpty) return const SizedBox.shrink();
+  Widget _buildRiskChartSection(List<ForecastData> forecastList) {
+    if (forecastList.isEmpty) return const SizedBox.shrink();
 
-    final scores = _riskService.calculateDailyRisks(_forecast);
+    final scores = _riskService.calculateDailyRisks(forecastList, isGreenhouse: _isGreenhouse);
     final limit = scores.length > 7 ? 7 : scores.length;
     final limitedScores = scores.sublist(0, limit);
     
-    final days = _forecast.take(limit).map((f) => DateFormat('E').format(f.date)).toList();
+    final days = forecastList.take(limit).map((f) => DateFormat('E').format(f.date)).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -571,7 +629,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             Icon(Icons.show_chart, color: Colors.blueGrey),
             SizedBox(width: 8),
             Text(
-              "7-Day Cumulative Risk",
+              "7 Günlük Kümülatif Risk Grafiği",
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
@@ -588,7 +646,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
            const Padding(
              padding: EdgeInsets.only(bottom: 12.0),
              child: Text(
-               "Risk Score (0-100%) based on Humidity & Temp",
+               "Nem ve Sıcaklık Bazlı Risk Skoru (%0-100)",
                style: TextStyle(fontSize: 12, color: Colors.grey),
              ),
            ),
@@ -597,3 +655,4 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 }
+
