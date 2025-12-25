@@ -1,0 +1,17 @@
+{
+  "appTitle": "Smart Plant Health",
+  "home": "Home",
+  "weather": "Weather",
+  "diagnosis": "Diagnosis",
+  "map": "Map",
+  "settings": "Settings",
+  "info": "Info",
+  "takePhoto": "Take Photo",
+  "gallery": "Gallery",
+  "riskHigh": "High Risk",
+  "riskMedium": "Medium Risk",
+  "riskLow": "Low Risk",
+  "loading": "Loading...",
+  "theme": "Dark Theme",
+  "language": "Language"
+}

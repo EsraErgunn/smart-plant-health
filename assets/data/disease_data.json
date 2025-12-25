@@ -1,0 +1,294 @@
+{
+  "Apple___Apple_scab": {
+    "name": "Elma Kara Leke (Apple Scab)",
+    "risk": "High",
+    "symptoms": [
+      "Yapraklarda koyu lekeler",
+      "Meyvede kabuk çatlaması",
+      "Erken yaprak dökülmesi"
+    ],
+    "causes": [
+      "Yüksek nem",
+      "Serin ve yağışlı hava"
+    ],
+    "treatment": [
+      "Uygun fungusit uygulayın",
+      "Enfekte yaprakları temizleyin"
+    ],
+    "prevention": [
+      "Hava sirkülasyonunu artırın",
+      "Düzenli budama yapın"
+    ]
+  },
+
+  "Apple___Black_rot": {
+    "name": "Elma Siyah Çürüklük",
+    "risk": "High",
+    "symptoms": [
+      "Meyvede siyah çürük lekeler",
+      "Dal ve yaprak kurumaları"
+    ],
+    "causes": [
+      "Mantar enfeksiyonu",
+      "Zayıf bitki direnci"
+    ],
+    "treatment": [
+      "Hasta dalları kesin",
+      "Fungusit uygulayın"
+    ],
+    "prevention": [
+      "Ağaç hijyenine dikkat edin",
+      "Hasarlı meyveleri uzaklaştırın"
+    ]
+  },
+
+  "Apple___Cedar_apple_rust": {
+    "name": "Elma Sedir Pası",
+    "risk": "Medium",
+    "symptoms": [
+      "Yapraklarda sarı-turuncu lekeler",
+      "Zayıf meyve gelişimi"
+    ],
+    "causes": [
+      "Pas mantarı",
+      "Yakın çevrede sedir ağaçları"
+    ],
+    "treatment": [
+      "Koruyucu fungusit kullanın"
+    ],
+    "prevention": [
+      "Sedir ağaçlarından uzak dikim",
+      "Erken dönem ilaçlama"
+    ]
+  },
+
+  "Apple___healthy": {
+    "name": "Sağlıklı Elma",
+    "risk": "Low",
+    "symptoms": [
+      "Belirti yok"
+    ],
+    "causes": [],
+    "treatment": [],
+    "prevention": [
+      "Düzenli bakım",
+      "Dengeli sulama ve gübreleme"
+    ]
+  },
+
+  "Corn_(maize)___Cercospora_leaf_spot_Gray_leaf_spot": {
+    "name": "Mısır Gri Yaprak Lekesi",
+    "risk": "High",
+    "symptoms": [
+      "Yapraklarda gri lekeler",
+      "Fotosentez azalması"
+    ],
+    "causes": [
+      "Yüksek nem",
+      "Yoğun ekim"
+    ],
+    "treatment": [
+      "Fungusit uygulaması"
+    ],
+    "prevention": [
+      "Ekim nöbeti",
+      "Dayanıklı tohum kullanımı"
+    ]
+  },
+
+  "Corn_(maize)___Common_rust": {
+    "name": "Mısır Pas Hastalığı",
+    "risk": "Medium",
+    "symptoms": [
+      "Yapraklarda kahverengi pas pustülleri"
+    ],
+    "causes": [
+      "Pas mantarı",
+      "Ilıman ve nemli hava"
+    ],
+    "treatment": [
+      "Fungusit uygulayın"
+    ],
+    "prevention": [
+      "Dayanıklı çeşitler",
+      "Erken ekim"
+    ]
+  },
+
+  "Corn_(maize)___healthy": {
+    "name": "Sağlıklı Mısır",
+    "risk": "Low",
+    "symptoms": [
+      "Belirti yok"
+    ],
+    "causes": [],
+    "treatment": [],
+    "prevention": [
+      "Toprak analizi",
+      "Dengeli gübreleme"
+    ]
+  },
+
+  "Corn_(maize)___Northern_Leaf_Blight": {
+    "name": "Mısır Kuzey Yaprak Yanıklığı",
+    "risk": "High",
+    "symptoms": [
+      "Uzun gri-yeşil lekeler",
+      "Yaprak kuruması"
+    ],
+    "causes": [
+      "Serin ve nemli hava"
+    ],
+    "treatment": [
+      "Fungusit uygulaması"
+    ],
+    "prevention": [
+      "Dayanıklı hibritler",
+      "Ekim nöbeti"
+    ]
+  },
+
+  "Grape___Black_rot": {
+    "name": "Üzüm Siyah Çürüklük",
+    "risk": "High",
+    "symptoms": [
+      "Meyvede siyah çürük",
+      "Yaprak lekeleri"
+    ],
+    "causes": [
+      "Mantar enfeksiyonu"
+    ],
+    "treatment": [
+      "Fungusit uygulayın"
+    ],
+    "prevention": [
+      "Bağ hijyeni",
+      "Düzenli budama"
+    ]
+  },
+
+  "Grape___Esca_(Black_Measles)": {
+    "name": "Üzüm Esca (Kara Benek)",
+    "risk": "High",
+    "symptoms": [
+      "Yapraklarda mozaik görünüm",
+      "Ani bitki ölümü"
+    ],
+    "causes": [
+      "Odun dokusu mantarları"
+    ],
+    "treatment": [
+      "Hasta bitkiler sökülmeli"
+    ],
+    "prevention": [
+      "Sağlıklı fidan kullanımı",
+      "Budama hijyeni"
+    ]
+  },
+
+  "Grape___healthy": {
+    "name": "Sağlıklı Üzüm",
+    "risk": "Low",
+    "symptoms": [
+      "Belirti yok"
+    ],
+    "causes": [],
+    "treatment": [],
+    "prevention": [
+      "Düzenli bakım",
+      "Doğru sulama"
+    ]
+  },
+
+  "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+    "name": "Üzüm Yaprak Yanıklığı",
+    "risk": "Medium",
+    "symptoms": [
+      "Yaprak kenarlarında yanıklık"
+    ],
+    "causes": [
+      "Mantar enfeksiyonu"
+    ],
+    "treatment": [
+      "Fungusit uygulaması"
+    ],
+    "prevention": [
+      "Hava sirkülasyonu",
+      "Bağ temizliği"
+    ]
+  },
+
+  "Tomato___Bacterial_spot": {
+    "name": "Domates Bakteriyel Leke",
+    "risk": "High",
+    "symptoms": [
+      "Yapraklarda küçük siyah lekeler",
+      "Meyvede yüzeysel hasar"
+    ],
+    "causes": [
+      "Bakteriyel enfeksiyon",
+      "Yüksek nem"
+    ],
+    "treatment": [
+      "Bakırlı ilaçlar"
+    ],
+    "prevention": [
+      "Sertifikalı tohum",
+      "Yaprak ıslatmadan sulama"
+    ]
+  },
+
+  "Tomato___Early_blight": {
+    "name": "Domates Erken Yanıklık",
+    "risk": "Medium",
+    "symptoms": [
+      "Alt yapraklarda kahverengi halkalar"
+    ],
+    "causes": [
+      "Mantar enfeksiyonu"
+    ],
+    "treatment": [
+      "Fungusit uygulayın"
+    ],
+    "prevention": [
+      "Ekim nöbeti",
+      "Bitki artıkları temizliği"
+    ]
+  },
+
+  "Tomato___healthy": {
+    "name": "Sağlıklı Domates",
+    "risk": "Low",
+    "symptoms": [
+      "Belirti yok"
+    ],
+    "causes": [],
+    "treatment": [],
+    "prevention": [
+      "Dengeli besleme",
+      "Düzenli kontrol"
+    ]
+  },
+
+  "Tomato___Late_blight": {
+    "name": "Domates Geç Yanıklık",
+    "risk": "High",
+    "symptoms": [
+      "Yapraklarda koyu lekeler",
+      "Hızlı solma",
+      "Meyvede çürüme"
+    ],
+    "causes": [
+      "Yüksek nem",
+      "Serin hava"
+    ],
+    "treatment": [
+      "Bakırlı fungusit",
+      "Hasta yaprakları temizleyin"
+    ],
+    "prevention": [
+      "Sık ekimden kaçının",
+      "Sabah sulama"
+    ]
+  }
+}

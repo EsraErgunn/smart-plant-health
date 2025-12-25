@@ -1,0 +1,16 @@
+0 Apple___Apple_scab
+1 Apple___Black_rot
+2 Apple___Cedar_apple_rust
+3 Apple___healthy
+4 Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+5 Corn_(maize)___Common_rust
+6 Corn_(maize)___Northern_Leaf_Blight
+7 Corn_(maize)___healthy
+8 Grape___Black_rot
+9 Grape___Esca_(Black_Measles)
+10 Grape___Leaf_blight_(Isariopsis_Leaf_Spot)
+11 Grape___healthy
+12 Tomato___Bacterial_spot
+13 Tomato___Early_blight
+14 Tomato___Late_blight
+15 Tomato___healthy

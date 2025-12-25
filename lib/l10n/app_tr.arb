@@ -1,0 +1,17 @@
+{
+  "appTitle": "Akıllı Bitki Sağlığı",
+  "home": "Ana Sayfa",
+  "weather": "Hava Durumu",
+  "diagnosis": "Teşhis",
+  "map": "Harita",
+  "settings": "Ayarlar",
+  "info": "Bilgi",
+  "takePhoto": "Fotoğraf Çek",
+  "gallery": "Galeri",
+  "riskHigh": "Yüksek Risk",
+  "riskMedium": "Orta Risk",
+  "riskLow": "Düşük Risk",
+  "loading": "Yükleniyor...",
+  "theme": "Koyu Tema",
+  "language": "Dil"
+}
