@@ -7,13 +7,13 @@ class GeminiService {
 
   Future<void> initialize() async {
     final apiKey = dotenv.env['GOOGLE_GEMINI_KEY'];
-    if (apiKey == null || apiKey.isEmpty || apiKey.contains('AIzaSyCM_7Yy4UJCX1LMaWgYy0mX-gXfPTT1cVE')) {
-      print("Gemini API Key missing or invalid.");
+    if (apiKey == null || apiKey.isEmpty) {
+      print("Gemini API Key missing.");
       return;
     }
 
     _model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-2.5-flash',
       apiKey: apiKey,
     );
   }
@@ -34,7 +34,9 @@ class GeminiService {
 
       final response = await _chatSession!.sendMessage(Content.text(question));
       return response.text ?? "I couldn't generate a response.";
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print("Gemini API Error: $e");
+      print("Stack Trace: $stackTrace");
       return "Error communicating with AI: $e";
     }
   }
