@@ -8,7 +8,7 @@ class GeocodingService {
   static const _baseUrl =
       'https://api.openweathermap.org/geo/1.0/direct';
 
-  /// 🔍 Şehir adına göre arama (Forward Geocoding)
+  ///  Şehir adına göre arama (Forward Geocoding)
   Future<List<City>> searchCity(String query) async {
     final apiKey = dotenv.env['OPENWEATHER_API_KEY'];
 
@@ -33,7 +33,7 @@ class GeocodingService {
     }
   }
 
-  /// 📍 Koordinattan gerçek adres alma (Reverse Geocoding)
+  ///  Koordinattan gerçek adres alma ksımı (Reverse Geocoding)
   static Future<String> getAddressFromLatLng(
       double lat, double lon) async {
     try {

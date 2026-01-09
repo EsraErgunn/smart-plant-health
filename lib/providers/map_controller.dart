@@ -75,7 +75,8 @@ class MapController extends ChangeNotifier {
     }
   }
 
-  // Initial load called by UI
+  // Hedef hastalık belirlenir ,Önerilen ilaç tipi hesaplanır, Kullanıcının GPS konumu alınır,
+  //Harita oraya gider,Bayiler aranır,Marker’lar basılır
   Future<void> loadCurrentLocationAndDealers(String diseaseName) async {
     _targetDisease = diseaseName;
     _recommendedMedicine = DiseaseFilter.getRequiredMedicineType(diseaseName);
@@ -103,7 +104,7 @@ class MapController extends ChangeNotifier {
     }
   }
 
-  // NEW: Update location manually (e.g. from Weather Screen city search)
+  // seçildiği yere göre haritanın güncellenmesi için yaptım
   Future<void> updateManualLocation(double lat, double lng) async {
     _currentPosition = LatLng(lat, lng);
     _lastCameraCenter = _currentPosition;
@@ -139,7 +140,7 @@ class MapController extends ChangeNotifier {
       debugPrint("Search failed: $e");
     }
   }
-
+// marker üretimi
   void _makeMarkers(List<PlaceModel> places) {
     _markers = places.map((place) {
       return Marker(

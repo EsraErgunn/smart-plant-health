@@ -7,7 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class MapService {
   static final String? _apiKey = dotenv.env['GOOGLE_MAPS_API_KEY']; 
   
-  // Use a generic global query for text search
+  // burada neye göre arama yaptığım var.
   static const String _defaultQuery = 'agricultural dealers, zirai ilaç bayileri';
 
   Future<List<PlaceModel>> searchDealers(
