@@ -21,6 +21,33 @@ Yaprak fotoğrafından bitki hastalığını **cihaz üzerinde** (TensorFlow Lit
 | Üzüm | Siyah çürüklük, Esca, yaprak yanıklığı, sağlıklı |
 | Domates | Bakteriyel leke, erken yanıklık, geç yanıklık, sağlıklı |
 
+## Veri kaynakları
+
+### Görüntü veri seti
+
+Model, Kaggle'daki **[New Plant Diseases Dataset (Augmented)](https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset)** ile eğitildi. Bu veri seti, **PlantVillage** veri setinin çevrimdışı veri artırma (augmentation) uygulanmış halidir: 38 sınıfta yaklaşık 87 bin RGB yaprak görüntüsü içerir. Bu projede yalnızca elma, mısır, üzüm ve domatese ait **16 sınıf** kullanıldı.
+
+Orijinal PlantVillage veri seti:
+
+- [spMohanty/PlantVillage-Dataset](https://github.com/spMohanty/PlantVillage-Dataset) (GitHub)
+- Hughes, D. P., & Salathé, M. (2015). *An open access repository of images on plant health to enable the development of mobile disease diagnostics.* [arXiv:1511.08060](https://arxiv.org/abs/1511.08060)
+
+### Model
+
+`assets/model/plant_disease_model.tflite` bu proje için eğitildi: ImageNet ağırlıklı **MobileNetV2** üzerinde transfer learning yapıldı, sonra TensorFlow Lite formatına çevrildi. Girdi 224×224 RGB görüntü, piksel değerleri 0–1 aralığında; çıktı 16 sınıf. Sınıf sırası `assets/model/labels.txt` dosyasındadır.
+
+### Hastalık bilgileri
+
+`assets/data/disease_data.json` içindeki belirti, neden, tedavi ve korunma bilgileri yapay zekâ desteğiyle hazırlandı ve tarım kaynaklarından kontrol edilerek derlendi. Bu bilgiler genel bilgilendirme amaçlıdır; ilaç kullanmadan önce bir ziraat mühendisine veya il/ilçe tarım müdürlüğüne danışılmalıdır.
+
+### Harici servisler
+
+| Servis | Kullanım |
+|---|---|
+| [OpenWeather API](https://openweathermap.org/api) | Anlık hava durumu, 5 günlük tahmin, şehir arama (geocoding) |
+| [Google Maps SDK & Places API](https://developers.google.com/maps) | Harita ve yakındaki zirai ilaç bayileri |
+| [Google Gemini API](https://ai.google.dev/) | Plant Doctor AI sohbeti |
+
 ## Kurulum
 
 ### Gereksinimler
