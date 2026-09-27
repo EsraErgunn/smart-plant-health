@@ -1,14 +1,15 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import '../config/env.dart';
 
 class GeminiService {
   GenerativeModel? _model;
   ChatSession? _chatSession;
 
   Future<void> initialize() async {
-    final apiKey = dotenv.env['GOOGLE_GEMINI_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      print("Gemini API Key missing.");
+    const apiKey = Env.geminiKey;
+    if (apiKey.isEmpty) {
+      debugPrint("Gemini API Key missing.");
       return;
     }
 
@@ -35,9 +36,9 @@ class GeminiService {
       final response = await _chatSession!.sendMessage(Content.text(question));
       return response.text ?? "I couldn't generate a response.";
     } catch (e, stackTrace) {
-      print("Gemini API Error: $e");
-      print("Stack Trace: $stackTrace");
-      return "Error communicating with AI: $e";
+      debugPrint("Gemini API Error: $e");
+      debugPrint("Stack Trace: $stackTrace");
+      return "Error communicating with AI. Please try again.";
     }
   }
 }

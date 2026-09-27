@@ -68,14 +68,19 @@ class _DetectScreenState extends State<DetectScreen> {
 
     try {
       final bytes = await file.readAsBytes();
-      final label = tflite.predict(bytes);
-      
+      final prediction = tflite.predict(bytes);
+
       if (!mounted) return;
 
       setState(() {
         _image = file;
         _loading = false;
       });
+
+      if (prediction.confidence < TFLiteService.confidenceThreshold) {
+        showSnack(AppLocalizations.of(context)!.notRecognized);
+        return;
+      }
 
       // Auto-save to gallery history
       // We use listen: false because we are in a method, not rebuilding UI based on this
@@ -85,12 +90,14 @@ class _DetectScreenState extends State<DetectScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PrescriptionScreen(diseaseKey: label),
+          builder: (context) => PrescriptionScreen(diseaseKey: prediction.label),
         ),
       );
     } catch (e) {
+      debugPrint("Prediction error: $e");
+      if (!mounted) return;
       setState(() => _loading = false);
-      showSnack("Hata: $e");
+      showSnack(AppLocalizations.of(context)!.predictionError);
     }
   }
 

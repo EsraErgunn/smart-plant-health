@@ -52,4 +52,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get language => 'Dil';
+
+  @override
+  String get notRecognized =>
+      'Bitki tanınamadı. Lütfen tek bir yaprağın daha net ve yakın bir fotoğrafını çekin.';
+
+  @override
+  String get predictionError =>
+      'Görüntü analiz edilemedi. Lütfen tekrar deneyin.';
 }

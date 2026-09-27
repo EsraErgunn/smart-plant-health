@@ -7,8 +7,7 @@ import 'map_screen.dart';
 class PrescriptionScreen extends StatefulWidget {
   final String diseaseKey;
 
-  const PrescriptionScreen({required this.diseaseKey, Key? key})
-      : super(key: key);
+  const PrescriptionScreen({required this.diseaseKey, super.key});
 
   @override
   State<PrescriptionScreen> createState() => _PrescriptionScreenState();

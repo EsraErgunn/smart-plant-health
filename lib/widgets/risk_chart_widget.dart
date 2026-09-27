@@ -107,9 +107,9 @@ class RiskChartWidget extends StatelessWidget {
             show: true,
             gradient: LinearGradient(
               colors: [
-                Colors.green.withOpacity(0.3),
-                Colors.orange.withOpacity(0.3),
-                Colors.red.withOpacity(0.3),
+                Colors.green.withValues(alpha: 0.3),
+                Colors.orange.withValues(alpha: 0.3),
+                Colors.red.withValues(alpha: 0.3),
               ],
                stops: const [0.0, 0.5, 1.0],
                begin: Alignment.bottomCenter,

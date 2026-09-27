@@ -13,5 +13,7 @@
   "riskLow": "Low Risk",
   "loading": "Loading...",
   "theme": "Dark Theme",
-  "language": "Language"
+  "language": "Language",
+  "notRecognized": "Plant could not be recognized. Please take a clearer, closer photo of a single leaf.",
+  "predictionError": "Image could not be analyzed. Please try again."
 }

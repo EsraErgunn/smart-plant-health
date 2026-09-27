@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geocoding/geocoding.dart';
+import '../config/env.dart';
 import '../models/city_model.dart';
 
 class GeocodingService {
@@ -10,9 +10,9 @@ class GeocodingService {
 
   ///  Şehir adına göre arama (Forward Geocoding)
   Future<List<City>> searchCity(String query) async {
-    final apiKey = dotenv.env['OPENWEATHER_API_KEY'];
+    const apiKey = Env.openWeatherKey;
 
-    if (apiKey == null || apiKey.isEmpty) {
+    if (apiKey.isEmpty) {
       throw Exception("OpenWeather API Key missing");
     }
 

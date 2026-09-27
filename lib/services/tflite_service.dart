@@ -1,10 +1,21 @@
-import 'dart:typed_data';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
+/// Tahmin sonucu: etiket ve 0-1 arası güven skoru.
+class Prediction {
+  final String label;
+  final double confidence;
+
+  const Prediction(this.label, this.confidence);
+}
+
 class TFLiteService {
+  /// Bu değerin altındaki tahminler "tanınmadı" kabul edilir.
+  static const double confidenceThreshold = 0.5;
+
   Interpreter? _interpreter;
   List<String> _labels = [];
 
@@ -14,7 +25,6 @@ class TFLiteService {
 
     final options = InterpreterOptions()..threads = 4;
 
-    // 🔑 DOĞRU: assets/ YAZMIYORUZ
     _interpreter = await Interpreter.fromAsset(
       'assets/model/plant_disease_model.tflite',
       options: options,
@@ -24,17 +34,40 @@ class TFLiteService {
     final labelData =
         await rootBundle.loadString('assets/model/labels.txt');
 
-    _labels = labelData
-        .split('\n')
-        .map((e) => e.trim().split(' ').last)
-        .where((e) => e.isNotEmpty)
-        .toList();
+    _labels = parseLabels(labelData);
 
     debugPrint("🟢 MODEL YÜKLENDİ | Label sayısı: ${_labels.length}");
   }
 
+  /// `labels.txt` satırlarını ("0 Apple___Apple_scab") etiket listesine çevirir.
+  /// Etiketin kendisi boşluk içerebildiği için yalnızca ilk boşluktan bölünür.
+  static List<String> parseLabels(String data) {
+    return data
+        .split('\n')
+        .map((e) {
+          final line = e.trim();
+          final firstSpace = line.indexOf(' ');
+          return firstSpace != -1 ? line.substring(firstSpace + 1).trim() : line;
+        })
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
+  /// Model çıktısı zaten olasılık değilse (logit) softmax uygular.
+  static List<double> toProbabilities(List<double> scores) {
+    final sum = scores.fold<double>(0, (a, b) => a + b);
+    final isProbability =
+        scores.every((s) => s >= 0 && s <= 1) && (sum - 1).abs() < 0.01;
+    if (isProbability) return scores;
+
+    final maxScore = scores.reduce(math.max);
+    final exps = scores.map((s) => math.exp(s - maxScore)).toList();
+    final expSum = exps.fold<double>(0, (a, b) => a + b);
+    return exps.map((e) => e / expSum).toList();
+  }
+
   /// 🧠 Görselden hastalık tahmini yapar
-  String predict(Uint8List imageBytes) {
+  Prediction predict(Uint8List imageBytes) {
     if (_interpreter == null || _labels.isEmpty) {
       throw Exception("Model veya etiketler yüklenmedi!");
     }
@@ -71,7 +104,7 @@ class TFLiteService {
     );
 
     // 5️⃣ En yüksek skoru bul
-    final scores = output[0] as List<double>;
+    final scores = toProbabilities(List<double>.from(output[0] as List));
     int maxIndex = 0;
     double maxScore = scores[0];
 
@@ -82,6 +115,6 @@ class TFLiteService {
       }
     }
 
-    return _labels[maxIndex];
+    return Prediction(_labels[maxIndex], maxScore);
   }
 }

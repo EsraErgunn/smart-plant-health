@@ -52,4 +52,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language => 'Language';
+
+  @override
+  String get notRecognized =>
+      'Plant could not be recognized. Please take a clearer, closer photo of a single leaf.';
+
+  @override
+  String get predictionError =>
+      'Image could not be analyzed. Please try again.';
 }

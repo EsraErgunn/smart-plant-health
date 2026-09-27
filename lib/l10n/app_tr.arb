@@ -13,5 +13,7 @@
   "riskLow": "Düşük Risk",
   "loading": "Yükleniyor...",
   "theme": "Koyu Tema",
-  "language": "Dil"
+  "language": "Dil",
+  "notRecognized": "Bitki tanınamadı. Lütfen tek bir yaprağın daha net ve yakın bir fotoğrafını çekin.",
+  "predictionError": "Görüntü analiz edilemedi. Lütfen tekrar deneyin."
 }

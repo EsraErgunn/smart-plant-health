@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/gen/app_localizations.dart';
 
@@ -26,9 +25,6 @@ void main() async {
   final diagnosisDb = DiagnosisDatabaseService();
   await diagnosisDb.init();
   
-  // Load environment variables
-  await dotenv.load(fileName: "assets/.env");
-
   // Initialize notifications
   final notificationService = NotificationService();
   await notificationService.initialize();

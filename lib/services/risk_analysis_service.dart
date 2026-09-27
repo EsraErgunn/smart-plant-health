@@ -239,20 +239,27 @@ class RiskAnalysisService {
       
       // Greenhouse boosts humidity risk score
       double humidityScore = 0;
-      if (day.humidity > 80) humidityScore = 50;
-      else if (day.humidity > 60) humidityScore = 30;
-      else if (day.humidity > 40) humidityScore = 10;
+      if (day.humidity > 80) {
+        humidityScore = 50;
+      } else if (day.humidity > 60) {
+        humidityScore = 30;
+      } else if (day.humidity > 40) {
+        humidityScore = 10;
+      }
       
       if (isGreenhouse) humidityScore += 10; // Greenhouse penalty
       score += humidityScore;
 
       // Temp
-      if (day.temp >= 20 && day.temp <= 30) score += 50;
-      else if (day.temp > 30) score += 30; 
-      else if (day.temp < 15) {
-        if (isGreenhouse) score += 30; // In greenhouse, assume we heat it up to danger zone
-        else score += 0; // Too cold outside for fungus usually
-      } 
+      if (day.temp >= 20 && day.temp <= 30) {
+        score += 50;
+      } else if (day.temp > 30) {
+        score += 30;
+      } else if (day.temp < 15 && isGreenhouse) {
+        // In greenhouse, assume we heat it up to danger zone.
+        // Outside it is usually too cold for fungus.
+        score += 30;
+      }
       
       if (score > 100) score = 100;
       return score;

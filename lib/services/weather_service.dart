@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 
+import '../config/env.dart';
 import '../models/weather_model.dart';
 
 class WeatherService {
@@ -10,10 +10,10 @@ class WeatherService {
 
   /// 🌦️ Anlık hava durumu
   Future<WeatherData?> getCurrentWeather(double lat, double lon) async {
-    final apiKey = dotenv.env['OPENWEATHER_API_KEY'];
+    const apiKey = Env.openWeatherKey;
 
     // ✅ DOĞRU API KEY KONTROLÜ
-    if (apiKey == null || apiKey.isEmpty) {
+    if (apiKey.isEmpty) {
       debugPrint("⚠️ OpenWeather API Key missing");
       return null;
     }
@@ -29,7 +29,7 @@ class WeatherService {
         return WeatherData.fromJson(json.decode(response.body));
       } else {
         debugPrint(
-          "❌ Weather API error | status: ${response.statusCode} | body: ${response.body}",
+          "❌ Weather API error | status: ${response.statusCode}",
         );
       }
     } catch (e) {
@@ -41,10 +41,10 @@ class WeatherService {
 
   /// 📅 5 günlük tahmin (günde 1 veri)
   Future<List<ForecastData>> getForecast(double lat, double lon) async {
-    final apiKey = dotenv.env['OPENWEATHER_API_KEY'];
+    const apiKey = Env.openWeatherKey;
 
     // ✅ DOĞRU API KEY KONTROLÜ
-    if (apiKey == null || apiKey.isEmpty) {
+    if (apiKey.isEmpty) {
       debugPrint("⚠️ OpenWeather API Key missing");
       return [];
     }
@@ -69,7 +69,7 @@ class WeatherService {
         return forecasts;
       } else {
         debugPrint(
-          "❌ Forecast API error | status: ${response.statusCode} | body: ${response.body}",
+          "❌ Forecast API error | status: ${response.statusCode}",
         );
       }
     } catch (e) {

@@ -42,5 +42,25 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# API Keys
+# ---- Gizli bilgiler / API anahtarları ----
 .env
+.env.*
+*.env
+env.json
+!env.example.json
+**/android/local.properties
+**/android/key.properties
+*.jks
+*.keystore
+**/android/app/google-services.json
+**/ios/Runner/GoogleService-Info.plist
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+
+# ---- Yerel debug / analiz çıktıları ----
+debug_*.dart
+analysis*.txt
+models.txt
+all_models.txt
+output.txt
+*.bak

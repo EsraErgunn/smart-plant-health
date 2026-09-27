@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/place_model.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/env.dart';
 
 class MapService {
-  static final String? _apiKey = dotenv.env['GOOGLE_MAPS_API_KEY']; 
+  static const String _apiKey = Env.googleMapsKey;
   
   // burada neye göre arama yaptığım var.
   static const String _defaultQuery = 'agricultural dealers, zirai ilaç bayileri';
@@ -15,7 +15,7 @@ class MapService {
     double lng, {
     String? query,
   }) async {
-    if (_apiKey == null) {
+    if (_apiKey.isEmpty) {
       debugPrint("GOOGLE_MAPS_API_KEY is missing");
       return [];
     }

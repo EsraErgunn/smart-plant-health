@@ -187,6 +187,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @notRecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant could not be recognized. Please take a clearer, closer photo of a single leaf.'**
+  String get notRecognized;
+
+  /// No description provided for @predictionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Image could not be analyzed. Please try again.'**
+  String get predictionError;
 }
 
 class _AppLocalizationsDelegate

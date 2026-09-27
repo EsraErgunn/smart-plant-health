@@ -48,7 +48,7 @@ class _MapScreenState extends State<MapScreen> {
               
               if (result != null && result is City) {
                  // Trigger global sync & animation
-                 if (mounted) {
+                 if (context.mounted) {
                    Provider.of<MapController>(context, listen: false)
                        .updateManualLocation(result.lat, result.lng);
                    
